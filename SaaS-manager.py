@@ -63,11 +63,11 @@ def main():
         st.write("Project management features will be developed here.")
     elif app_mode == "Gantt Chart":
         with st.form("task_form"):
-        task = st.text_input("Task Name")
-        resource = st.text_input("Resource")
-        start = st.date_input("Start Date", datetime.today())
-        end = st.date_input("End Date", datetime.today())
-        submit_button = st.form_submit_button(label='Add Task')
+            task = st.text_input("Task Name")
+            resource = st.text_input("Resource")
+            start = st.date_input("Start Date", datetime.today())
+            end = st.date_input("End Date", datetime.today())
+            submit_button = st.form_submit_button(label='Add Task')
 
         # Initialize session state to store tasks
         if 'tasks' not in st.session_state:
