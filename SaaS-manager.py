@@ -2,6 +2,27 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
+from datetime import timedelta
+
+# Function to process Excel file and create Gantt chart data
+def process_file(uploaded_file):
+    df = pd.read_excel(uploaded_file)
+    df['Start'] = pd.to_datetime(df['Start'])
+    df['End'] = pd.to_datetime(df['End'])
+    df['Duration'] = df['End'] - df['Start']
+    df['End with Emergency'] = df['End'] + df['Emergency Time'].apply(lambda x: timedelta(days=x))
+    return df
+
+# Function to create a Gantt chart using Altair
+def create_gantt_chart(df):
+    chart = alt.Chart(df).mark_bar().encode(
+        x='Start:T',
+        x2='End with Emergency:T',
+        y=alt.Y('Task:N', sort=None),
+        color='Resource:N',
+        tooltip=['Task', 'Resource', 'Start', 'End', 'Duration', 'Emergency Time', 'Price Spent']
+    ).properties(title="Project Gantt Chart")
+    return chart
 
 # Mock data for budget
 def create_mock_data():
@@ -47,6 +68,15 @@ def main():
         budget_tracking()
     elif app_mode == "Project Management":
         st.write("Project management features will be developed here.")
+    elif app_mode == "Gantt Chart":
+        st.write("### Gantt Chart Generator")
+        st.write("Upload your project schedule Excel file.")
+        uploaded_file = st.file_uploader("Upload Excel", type=['xlsx'])
+
+        if uploaded_file is not None:
+            data = process_file(uploaded_file)
+            gantt_chart = create_gantt_chart(data)
+            st.altair_chart(gantt_chart, use_container_width=True)
 
 if __name__ == "__main__":
     main()
