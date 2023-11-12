@@ -4,6 +4,7 @@ import numpy as np
 import altair as alt
 from datetime import timedelta
 import io
+from xlsxwriter import Workbook
 
 
 # Function to create a sample data frame
