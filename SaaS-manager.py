@@ -1,29 +1,45 @@
 import streamlit as st
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
-# Function to display the budget management section
-def budget_management():
-    st.header("Budget Management")
-    st.write("Budget management features will go here.")
+# Mock data for budget
+def create_mock_data():
+    categories = ['Education', 'Healthcare', 'Infrastructure', 'Public Safety', 'Recreation']
+    budget = np.random.randint(100000, 1000000, size=len(categories))
+    spent = budget * np.random.rand(len(categories))
+    return pd.DataFrame({'Category': categories, 'Budget': budget, 'Spent': spent})
 
-# Function to display the project management section
-def project_management():
-    st.header("Project Management")
-    st.write("Project management features will go here.")
+# Function to display budget tracking
+def budget_tracking():
+    st.header("Budget Tracking and Analysis")
+    df = create_mock_data()
+
+    st.write("### Budget Overview")
+    st.dataframe(df)
+
+    st.write("### Budget Utilization Chart")
+    fig, ax = plt.subplots()
+    ax.barh(df['Category'], df['Budget'], color='skyblue', label='Budget')
+    ax.barh(df['Category'], df['Spent'], color='salmon', label='Spent')
+    ax.set_xlabel('Amount')
+    ax.set_title('Budget vs. Spent by Category')
+    ax.legend()
+    st.pyplot(fig)
 
 # Main application
 def main():
     st.title("Municipality Budget and Project Management SaaS")
 
     st.sidebar.title("Navigation")
-    app_mode = st.sidebar.radio("Choose the module",
-                                ["Home", "Budget Management", "Project Management"])
+    app_mode = st.sidebar.radio("Choose the module", ["Home", "Budget Tracking", "Project Management"])
 
     if app_mode == "Home":
         st.write("Welcome to the Municipality Budget and Project Management System!")
-    elif app_mode == "Budget Management":
-        budget_management()
+    elif app_mode == "Budget Tracking":
+        budget_tracking()
     elif app_mode == "Project Management":
-        project_management()
+        st.write("Project management features will be developed here.")
 
 if __name__ == "__main__":
     main()
