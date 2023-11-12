@@ -6,36 +6,14 @@ from datetime import timedelta
 import io
 
 
-# Function to create a sample data frame
-# Function to add project data
-def add_project_data(projects):
-    with st.form("Project Data Form"):
-        task = st.text_input("Task Name")
-        resource = st.text_input("Resource")
-        start = st.date_input("Start Date", datetime.today())
-        duration = st.slider("Duration (weeks)", 1, 52, 4)
-        salary = st.number_input("Salary", value=1000)
-        submit = st.form_submit_button("Add Task")
-
-        if submit:
-            end = start + timedelta(weeks=duration)
-            projects.append({
-                "Task": task,
-                "Resource": resource,
-                "Start": start,
-                "End": end,
-                "Salary": salary
-            })
-
 # Function to create a Gantt chart
-def create_gantt_chart(projects):
-    df = pd.DataFrame(projects)
+def create_gantt_chart(df):
     chart = alt.Chart(df).mark_bar().encode(
         x='Start:T',
         x2='End:T',
         y=alt.Y('Task:N', sort=None),
         color='Resource:N',
-        tooltip=['Task', 'Resource', 'Start', 'End', 'Salary']
+        tooltip=['Task', 'Resource', 'Start', 'End']
     ).properties(title="Project Gantt Chart")
     return chart
 
@@ -84,13 +62,28 @@ def main():
     elif app_mode == "Project Management":
         st.write("Project management features will be developed here.")
     elif app_mode == "Gantt Chart":
-        st.write("### Enter Project Details")
-        projects = []  # Store project data
-        add_project_data(projects)
+        with st.form("task_form"):
+        task = st.text_input("Task Name")
+        resource = st.text_input("Resource")
+        start = st.date_input("Start Date", datetime.today())
+        end = st.date_input("End Date", datetime.today())
+        submit_button = st.form_submit_button(label='Add Task')
 
-        if projects:
-            st.write("### Gantt Chart")
-            gantt_chart = create_gantt_chart(projects)
+        # Initialize session state to store tasks
+        if 'tasks' not in st.session_state:
+            st.session_state.tasks = []
+    
+        if submit_button:
+            st.session_state.tasks.append({
+                "Task": task,
+                "Resource": resource,
+                "Start": start,
+                "End": end
+            })
+    
+        if st.session_state.tasks:
+            df = pd.DataFrame(st.session_state.tasks)
+            gantt_chart = create_gantt_chart(df)
             st.altair_chart(gantt_chart, use_container_width=True)
 
 if __name__ == "__main__":
