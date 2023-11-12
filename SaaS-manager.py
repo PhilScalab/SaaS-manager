@@ -61,7 +61,7 @@ def main():
     st.title("Municipality Budget and Project Management SaaS")
 
     st.sidebar.title("Navigation")
-    app_mode = st.sidebar.radio("Choose the module", ["Home", "Budget Tracking", "Project Management"])
+    app_mode = st.sidebar.radio("Choose the module", ["Home", "Budget Tracking", "Project Management", "Gantt Chart"])
 
     if app_mode == "Home":
         st.write("Welcome to the Municipality Budget and Project Management System!")
