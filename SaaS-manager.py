@@ -4,6 +4,7 @@ import numpy as np
 import altair as alt
 from datetime import timedelta
 
+
 # Function to process Excel file and create Gantt chart data
 def process_file(uploaded_file):
     df = pd.read_excel(uploaded_file)
