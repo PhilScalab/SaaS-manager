@@ -5,6 +5,7 @@ import altair as alt
 from datetime import timedelta
 import io
 
+
 # Function to create a sample data frame
 def create_sample_data():
     sample_data = {
