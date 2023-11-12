@@ -3,6 +3,30 @@ import pandas as pd
 import numpy as np
 import altair as alt
 from datetime import timedelta
+import io
+
+# Function to create a sample data frame
+def create_sample_data():
+    sample_data = {
+        'Task': ['Task A', 'Task B', 'Task C'],
+        'Resource': ['Team 1', 'Team 2', 'Team 3'],
+        'Start': pd.to_datetime(['2023-01-01', '2023-01-15', '2023-02-01']),
+        'End': pd.to_datetime(['2023-01-10', '2023-01-25', '2023-02-15']),
+        'Emergency Time': [2, 3, 4],  # days
+        'Price Spent': [1000, 1500, 1200]
+    }
+    return pd.DataFrame(sample_data)
+
+# Function to create and download an Excel template
+def download_excel_template():
+    data = create_sample_data()
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        data.to_excel(writer, index=False, sheet_name='Template')
+    st.download_button(label="Download Excel Template",
+                       data=output.getvalue(),
+                       file_name="gantt_chart_template.xlsx",
+                       mime="application/vnd.ms-excel")
 
 
 # Function to process Excel file and create Gantt chart data
@@ -71,13 +95,24 @@ def main():
         st.write("Project management features will be developed here.")
     elif app_mode == "Gantt Chart":
         st.write("### Gantt Chart Generator")
-        st.write("Upload your project schedule Excel file.")
+        
+        # Display Download Template Button
+        st.write("Download the Excel template to format your project data.")
+        download_excel_template()
+
+        st.write("### Upload Your Project Schedule")
         uploaded_file = st.file_uploader("Upload Excel", type=['xlsx'])
 
         if uploaded_file is not None:
             data = process_file(uploaded_file)
             gantt_chart = create_gantt_chart(data)
             st.altair_chart(gantt_chart, use_container_width=True)
+        
+        # Display Gantt Chart with Sample Data
+        st.write("### Example Gantt Chart")
+        sample_data = create_sample_data()
+        sample_gantt_chart = create_gantt_chart(sample_data)
+        st.altair_chart(sample_gantt_chart, use_container_width=True)
 
 if __name__ == "__main__":
     main()
