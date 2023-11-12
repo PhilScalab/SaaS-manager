@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib as plt
+import altair as alt
 
 # Mock data for budget
 def create_mock_data():
@@ -10,7 +10,7 @@ def create_mock_data():
     spent = budget * np.random.rand(len(categories))
     return pd.DataFrame({'Category': categories, 'Budget': budget, 'Spent': spent})
 
-# Function to display budget tracking
+# Function to display budget tracking using Altair
 def budget_tracking():
     st.header("Budget Tracking and Analysis")
     df = create_mock_data()
@@ -19,13 +19,20 @@ def budget_tracking():
     st.dataframe(df)
 
     st.write("### Budget Utilization Chart")
-    fig, ax = plt.subplots()
-    ax.barh(df['Category'], df['Budget'], color='skyblue', label='Budget')
-    ax.barh(df['Category'], df['Spent'], color='salmon', label='Spent')
-    ax.set_xlabel('Amount')
-    ax.set_title('Budget vs. Spent by Category')
-    ax.legend()
-    st.pyplot(fig)
+
+    chart = alt.Chart(df).mark_bar().encode(
+        x='Category:N',
+        y='Budget:Q',
+        color=alt.value('skyblue'),
+        tooltip=['Category', 'Budget', 'Spent']
+    ) + alt.Chart(df).mark_bar().encode(
+        x='Category:N',
+        y='Spent:Q',
+        color=alt.value('salmon'),
+        tooltip=['Category', 'Budget', 'Spent']
+    )
+
+    st.altair_chart(chart, use_container_width=True)
 
 # Main application
 def main():
