@@ -4,50 +4,38 @@ import numpy as np
 import altair as alt
 from datetime import timedelta
 import io
-from xlsxwriter import Workbook
 
 
 # Function to create a sample data frame
-def create_sample_data():
-    sample_data = {
-        'Task': ['Task A', 'Task B', 'Task C'],
-        'Resource': ['Team 1', 'Team 2', 'Team 3'],
-        'Start': pd.to_datetime(['2023-01-01', '2023-01-15', '2023-02-01']),
-        'End': pd.to_datetime(['2023-01-10', '2023-01-25', '2023-02-15']),
-        'Emergency Time': [2, 3, 4],  # days
-        'Price Spent': [1000, 1500, 1200]
-    }
-    return pd.DataFrame(sample_data)
+# Function to add project data
+def add_project_data(projects):
+    with st.form("Project Data Form"):
+        task = st.text_input("Task Name")
+        resource = st.text_input("Resource")
+        start = st.date_input("Start Date", datetime.today())
+        duration = st.slider("Duration (weeks)", 1, 52, 4)
+        salary = st.number_input("Salary", value=1000)
+        submit = st.form_submit_button("Add Task")
 
-# Function to create and download an Excel template
-def download_excel_template():
-    data = create_sample_data()
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        data.to_excel(writer, index=False, sheet_name='Template')
-    st.download_button(label="Download Excel Template",
-                       data=output.getvalue(),
-                       file_name="gantt_chart_template.xlsx",
-                       mime="application/vnd.ms-excel")
+        if submit:
+            end = start + timedelta(weeks=duration)
+            projects.append({
+                "Task": task,
+                "Resource": resource,
+                "Start": start,
+                "End": end,
+                "Salary": salary
+            })
 
-
-# Function to process Excel file and create Gantt chart data
-def process_file(uploaded_file):
-    df = pd.read_excel(uploaded_file)
-    df['Start'] = pd.to_datetime(df['Start'])
-    df['End'] = pd.to_datetime(df['End'])
-    df['Duration'] = df['End'] - df['Start']
-    df['End with Emergency'] = df['End'] + df['Emergency Time'].apply(lambda x: timedelta(days=x))
-    return df
-
-# Function to create a Gantt chart using Altair
-def create_gantt_chart(df):
+# Function to create a Gantt chart
+def create_gantt_chart(projects):
+    df = pd.DataFrame(projects)
     chart = alt.Chart(df).mark_bar().encode(
         x='Start:T',
-        x2='End with Emergency:T',
+        x2='End:T',
         y=alt.Y('Task:N', sort=None),
         color='Resource:N',
-        tooltip=['Task', 'Resource', 'Start', 'End', 'Duration', 'Emergency Time', 'Price Spent']
+        tooltip=['Task', 'Resource', 'Start', 'End', 'Salary']
     ).properties(title="Project Gantt Chart")
     return chart
 
@@ -96,25 +84,14 @@ def main():
     elif app_mode == "Project Management":
         st.write("Project management features will be developed here.")
     elif app_mode == "Gantt Chart":
-        st.write("### Gantt Chart Generator")
-        
-        # Display Download Template Button
-        st.write("Download the Excel template to format your project data.")
-        download_excel_template()
+        st.write("### Enter Project Details")
+        projects = []  # Store project data
+        add_project_data(projects)
 
-        st.write("### Upload Your Project Schedule")
-        uploaded_file = st.file_uploader("Upload Excel", type=['xlsx'])
-
-        if uploaded_file is not None:
-            data = process_file(uploaded_file)
-            gantt_chart = create_gantt_chart(data)
+        if projects:
+            st.write("### Gantt Chart")
+            gantt_chart = create_gantt_chart(projects)
             st.altair_chart(gantt_chart, use_container_width=True)
-        
-        # Display Gantt Chart with Sample Data
-        st.write("### Example Gantt Chart")
-        sample_data = create_sample_data()
-        sample_gantt_chart = create_gantt_chart(sample_data)
-        st.altair_chart(sample_gantt_chart, use_container_width=True)
 
 if __name__ == "__main__":
     main()
